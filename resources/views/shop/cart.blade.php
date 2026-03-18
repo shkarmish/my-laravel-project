@@ -43,5 +43,26 @@
 
 <!-- Total -->
 <h3>Total: ${{ $total }}</h3>
+<!-- Return to Shopping Button -->
+    <a href="{{ url('/shop') }}" 
+       style="padding:10px 20px; background:gray; color:white; text-decoration:none; border-radius:5px;">
+       Return to Shopping
+    </a>&nbsp;
+
+@if($total > 0)
+    <a href="{{ route('checkout.index') }}" style="padding:10px 20px; background:green; color:white; text-decoration:none; border-radius:5px;">
+        Checkout
+    </a>&nbsp;
+@endif
+
+<!-- Remove All Button -->
+ <div style="display: flex; justify-content: end; flex-wrap: wrap; padding-right: 15px;" class="remove-all-btn">
+       @if($total > 0)
+        <a href="{{ route('cart.removeAll') }}" 
+           style="padding:10px 20px; background:red; color:white; text-decoration:none; border-radius:5px;">
+           Remove All
+        </a>
+    @endif
+ </div>
 
 @endsection

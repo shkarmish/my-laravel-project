@@ -25,6 +25,12 @@ Route::get('/cart/increase/{product}', [CartController::class, 'increase'])->nam
 Route::get('/cart/decrease/{product}', [CartController::class, 'decrease'])->name('cart.decrease');
 Route::get('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+Route::get('/cart/remove-all', [CartController::class, 'removeAll'])->name('cart.removeAll');
 
+
+use App\Http\Controllers\CheckoutController;
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'charge'])->name('checkout.charge');
 
 ?>

@@ -86,4 +86,13 @@ public function remove(Product $product)
 
     return redirect()->back();
 }
+
+public function removeAll()
+{
+    Cart::truncate(); // Ye cart table ki saari rows delete kar dega
+
+    // Redirect to shop page after clearing cart
+    return redirect('/shop')->with('info', 'All products removed from cart.');
+}
+
 }
