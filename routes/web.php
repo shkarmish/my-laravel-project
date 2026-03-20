@@ -1,17 +1,12 @@
 <?php
-use App\Http\Controllers\ProductController;
-Route::get('/admin/products', [ProductController::class, 'index']);
-Route::get('/admin/products/create', [ProductController::class, 'create']);
-Route::post('/admin/products', [ProductController::class, 'store']);
-// User / Shop page
-Route::get('/shop', [ProductController::class, 'shop']);
-
 use Illuminate\Support\Facades\Route;
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/', [ProductController::class, 'shop']);
+use App\Http\Controllers\ProductController;
+Route::get('/', [ProductController::class, 'home'])->name('home');
+// Shop page -> full products + add to cart
+Route::get('/shop', [ProductController::class, 'index'])->name('shop.index');
+Route::get('/admin/products', [ProductController::class, 'adminIndex'])->name('admin.products.index');
+Route::get('/admin/products/create', [ProductController::class, 'create'])->name('admin.products.create');
+Route::post('/admin/products', [ProductController::class, 'store'])->name('admin.products.store');
 Route::get('/product/{id}', [ProductController::class, 'show']);
 Route::get('/add-to-cart/{id}', [ProductController::class, 'addToCart']);
 Route::get('/cart', [ProductController::class, 'cart']);

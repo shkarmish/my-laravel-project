@@ -10,11 +10,23 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
+       public function home()
+    {
+        $products = Product::latest()->take(8)->get();
+        return view('home', compact('products'));
+    }
     public function index()
     {
-      $products = Product::all(); // Retrieve all products from the database
-    return view('admin.products.index', compact('products'));
+      $products = Product::all();
+        return view('shop.index', compact('products'));
     }
+
+    public function adminIndex() {
+    // ADMIN PAGE
+     $products = Product::all();
+        return view('admin.products.index', compact('products'));
+}
+
 
     /**
      * Show the form for creating a new resource.
@@ -125,4 +137,5 @@ public function cart() {
     $cart = session()->get('cart', []);
     return view('shop.cart', compact('cart'));
 }
+
 }
