@@ -12,9 +12,19 @@ class ProductController extends Controller
         return view('home', compact('products'));
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all();
+        // Paginate 8 products per page
+        $products = Product::paginate(8);
+
+        // If AJAX request, return only the products partial + pagination links as JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'html'       => view('shop.partials.products', compact('products'))->render(),
+                'pagination' => view('shop.partials.pagination', compact('products'))->render(),
+            ]);
+        }
+
         return view('shop.index', compact('products'));
     }
 
@@ -63,13 +73,11 @@ class ProductController extends Controller
         //
     }
 
-    // Edit form show
     public function edit(Product $product)
     {
         return view('admin.products.edit', compact('product'));
     }
 
-    // Update to database
     public function update(Request $request, Product $product)
     {
         $request->validate([
@@ -80,13 +88,10 @@ class ProductController extends Controller
             'image'       => 'nullable|image|mimes:jpg,png,jpeg,gif,svg|max:2048'
         ]);
 
-        // If a new image is uploaded, replace it; otherwise, keep the old one.
         if ($request->hasFile('image')) {
-            // Delete the old image (if it exists).
             if ($product->image && file_exists(public_path('images/' . $product->image))) {
                 unlink(public_path('images/' . $product->image));
             }
-
             $image     = $request->file('image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $image->move(public_path('images'), $imageName);
@@ -102,10 +107,8 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
 
-    // Delete it
     public function destroy(Product $product)
     {
-        // Delete the image from the server as well.
         if ($product->image && file_exists(public_path('images/' . $product->image))) {
             unlink(public_path('images/' . $product->image));
         }
@@ -147,5 +150,3 @@ class ProductController extends Controller
         return view('shop.cart', compact('cart'));
     }
 }
-
-?>

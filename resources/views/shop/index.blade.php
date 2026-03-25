@@ -4,29 +4,14 @@
 
 <h1 class="shop-title">All Products</h1>
 
-<div class="shop-grid">
-
-@foreach($products as $product)
-<div class="shop-card">
-
-    @if($product->image)
-        <img src="{{ asset('images/'.$product->image) }}" class="shop-image">
-    @endif
-
-    <h3 class="shop-name">{{ $product->name }}</h3>
-    <p class="shop-price">Price: ${{ $product->price }}</p>
-    <p class="shop-description">{{ $product->description }}</p>
-
-    {{-- method="POST" added — was missing before (caused undefined in AJAX URL) --}}
-    {{-- class="add-to-cart-form" is picked up by AJAX in app.blade.php --}}
-    <form action="{{ route('cart.add', $product->id) }}" method="POST" class="add-to-cart-form">
-        @csrf
-        <button type="submit" class="add-to-cart-btn">Add to Cart</button>
-    </form>
-
+{{-- Products grid — this div is replaced by AJAX on page change --}}
+<div class="shop-grid" id="products-container">
+    @include('shop.partials.products', ['products' => $products])
 </div>
-@endforeach
 
+{{-- Pagination buttons — this div is also replaced by AJAX --}}
+<div id="pagination-container">
+    @include('shop.partials.pagination', ['products' => $products])
 </div>
 
 <style>
@@ -41,6 +26,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
         gap: 20px;
+        min-height: 400px; /* Prevents layout jump while loading */
     }
 
     /* Single product card */
@@ -103,16 +89,67 @@
         background: #333;
     }
 
-    /* Mobile — 2 columns on small screens */
+    /* ── Pagination ── */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 30px 0 20px;
+    }
+
+    /* Individual page button */
+    .page-btn {
+        padding: 8px 14px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: white;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+    }
+
+    .page-btn:hover {
+        background: #f0f0f0;
+    }
+
+    /* Active (current) page */
+    .page-btn-active {
+        background: #000;
+        color: white;
+        border-color: #000;
+    }
+
+    .page-btn-active:hover {
+        background: #333;
+    }
+
+    /* Disabled prev/next at edges */
+    .page-btn-disabled {
+        padding: 8px 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        color: #bbb;
+        font-size: 14px;
+        cursor: default;
+    }
+
+    /* Loading overlay shown while AJAX is fetching */
+    .loading-overlay {
+        opacity: 0.4;
+        pointer-events: none;
+        transition: opacity 0.2s;
+    }
+
+    /* Mobile — 2 columns */
     @media (max-width: 480px) {
         .shop-grid {
-            grid-template-columns: repeat(1, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
         }
 
         .shop-image {
-            height: auto;
-            width: 50%;
+            height: 130px;
         }
 
         .shop-name {
@@ -131,7 +168,50 @@
             padding: 8px 10px;
             font-size: 12px;
         }
+
+        .page-btn, .page-btn-disabled {
+            padding: 6px 10px;
+            font-size: 13px;
+        }
     }
 </style>
+
+<script>
+    // Fetch a specific page via AJAX and update the DOM without reload
+    function loadPage(page) {
+        const container  = document.getElementById('products-container');
+        const pagination = document.getElementById('pagination-container');
+
+        // Show subtle loading state
+        container.classList.add('loading-overlay');
+
+        $.ajax({
+            url: '{{ route('shop.index') }}',
+            method: 'GET',
+            data: { page: page },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest' // Tells Laravel this is an AJAX request
+            },
+            success: function (response) {
+                // Replace products grid and pagination with fresh HTML
+                container.innerHTML  = response.html;
+                pagination.innerHTML = response.pagination;
+
+                // Remove loading state
+                container.classList.remove('loading-overlay');
+
+                // Scroll to top of products smoothly
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    // Listen for pagination button clicks — use event delegation
+    // so it works even after AJAX replaces the pagination HTML
+    $(document).on('click', '.page-btn[data-page]', function () {
+        const page = $(this).data('page');
+        loadPage(page);
+    });
+</script>
 
 @endsection
