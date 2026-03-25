@@ -20,7 +20,9 @@
     <!-- Product info -->
     <div class="cart-item-info">
         <h3 class="cart-item-name">{{ $item->product->name }}</h3>
+        <p class="cart-item-description">{{ $item->product->description }}</p>
         <p class="cart-item-price">Price: ${{ $item->product->price }}</p>
+        
 
         <!-- Quantity controls -->
         <p class="cart-item-qty">
