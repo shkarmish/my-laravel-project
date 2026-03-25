@@ -133,6 +133,7 @@
         <div class="navbar-links">
             <a href="{{ url('/') }}">Home</a>
             <a href="{{ route('shop.index') }}">Products</a>
+            <a href="{{ route('contact.form') }}">Contact Us</a>
         </div>
 
         <!-- Hamburger button (visible below 768px) -->
@@ -147,7 +148,9 @@
     <div class="mobile-menu" id="mobile-menu">
         <a href="{{ url('/') }}">Home</a>
         <a href="{{ route('shop.index') }}">Products</a>
+        <a href="{{ route('contact.form') }}">Contact Us</a>
         <a href="{{ route('cart.index') }}">Cart (<span id="mobile-cart-count">{{ \App\Models\Cart::sum('quantity') }}</span>)</a>
+        
     </div>
 
     <!-- Cart icon — shown on desktop only, mobile uses the menu link above -->

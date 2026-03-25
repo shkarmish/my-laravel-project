@@ -30,4 +30,9 @@ Route::get('/cart/remove-all',         [CartController::class, 'removeAll'])->na
 Route::get('/checkout',  [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout', [CheckoutController::class, 'charge'])->name('checkout.charge');
 
+use App\Http\Controllers\ContactController;
+
+Route::get('/contact-us', [ContactController::class, 'index'])->name('contact.form');
+Route::post('/contact-us', [ContactController::class, 'store'])->name('contact.submit');
+
 ?>
