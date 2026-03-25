@@ -21,7 +21,7 @@ class ProductController extends Controller
                 $q->where('name', 'like', '%' . $query . '%')
                   ->orWhere('description', 'like', '%' . $query . '%');
             })
-            ->paginate(8)
+            ->paginate(12)
             ->appends(['search' => $query]); // Keep search term in pagination links
 
         // AJAX request — return partials as JSON
