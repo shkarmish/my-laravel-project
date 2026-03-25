@@ -14,10 +14,17 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        // Paginate 8 products per page
-        $products = Product::paginate(8);
+        $query = $request->get('search', '');
 
-        // If AJAX request, return only the products partial + pagination links as JSON
+        // Filter by search term if provided, then paginate 8 per page
+        $products = Product::when($query, function ($q) use ($query) {
+                $q->where('name', 'like', '%' . $query . '%')
+                  ->orWhere('description', 'like', '%' . $query . '%');
+            })
+            ->paginate(8)
+            ->appends(['search' => $query]); // Keep search term in pagination links
+
+        // AJAX request — return partials as JSON
         if ($request->ajax()) {
             return response()->json([
                 'html'       => view('shop.partials.products', compact('products'))->render(),
@@ -25,7 +32,7 @@ class ProductController extends Controller
             ]);
         }
 
-        return view('shop.index', compact('products'));
+        return view('shop.index', compact('products', 'query'));
     }
 
     public function adminIndex()
@@ -68,10 +75,7 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Product added successfully!');
     }
 
-    public function show(Product $product)
-    {
-        //
-    }
+    public function show(Product $product) {}
 
     public function edit(Product $product)
     {
@@ -112,9 +116,7 @@ class ProductController extends Controller
         if ($product->image && file_exists(public_path('images/' . $product->image))) {
             unlink(public_path('images/' . $product->image));
         }
-
         $product->delete();
-
         return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully!');
     }
 

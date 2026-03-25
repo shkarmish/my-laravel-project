@@ -8,12 +8,25 @@
     <!-- Dark overlay so text is readable over the background image -->
     <div class="hero-overlay"></div>
 
-    <!-- Hero content — centered text + CTA button -->
+    <!-- Hero content — centered text + search bar + CTA button -->
     <div class="hero-content">
         <p class="hero-tagline">New Arrivals Every Week</p>
         <h1 class="hero-heading">Discover Products<br>You'll Actually Love</h1>
         <p class="hero-subtext">Handpicked quality items delivered straight to your door.<br>Shop the latest trends at unbeatable prices.</p>
-        <a href="{{ route('shop.index') }}" class="hero-cta">Shop Now &rarr;</a>
+
+        <!-- Search bar — submits to /shop with search query -->
+        <form class="hero-search-form" action="{{ route('shop.index') }}" method="GET">
+            <input
+                type="text"
+                name="search"
+                class="hero-search-input"
+                placeholder="Search for products..."
+                autocomplete="off"
+            >
+            <button type="submit" class="hero-search-btn">Search</button>
+        </form>
+
+        <a href="{{ route('shop.index') }}" class="hero-cta">Browse All Products &rarr;</a>
     </div>
 
 </div>
@@ -59,23 +72,19 @@
     .hero {
         position: relative;
         width: 100%;
-        height: 520px;
+        height: 560px;
         margin-bottom: 40px;
-
-        /* Background image from Unsplash — e-commerce lifestyle */
         background-image: url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1400');
         background-size: cover;
         background-position: center;
         border-radius: 12px;
         overflow: hidden;
-
-        /* Center all child elements */
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    /* Semi-transparent dark layer over the image for text contrast */
+    /* Dark overlay for text contrast */
     .hero-overlay {
         position: absolute;
         inset: 0;
@@ -83,17 +92,17 @@
         border-radius: 12px;
     }
 
-    /* Text container sits above the overlay */
+    /* Text + search container above overlay */
     .hero-content {
         position: relative;
         z-index: 1;
         text-align: center;
         color: white;
         padding: 0 20px;
-        max-width: 700px;
+        max-width: 680px;
+        width: 100%;
     }
 
-    /* Small label above the main heading */
     .hero-tagline {
         font-size: 14px;
         letter-spacing: 3px;
@@ -102,51 +111,81 @@
         margin-bottom: 12px;
     }
 
-    /* Main headline */
     .hero-heading {
         font-size: 52px;
         font-weight: 700;
         line-height: 1.15;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
     }
 
-    /* Supporting text below heading */
     .hero-subtext {
         font-size: 17px;
         color: rgba(255, 255, 255, 0.85);
         line-height: 1.6;
-        margin-bottom: 30px;
+        margin-bottom: 28px;
     }
 
-    /* CTA button */
-    .hero-cta {
-        display: inline-block;
-        padding: 14px 36px;
+    /* Search bar inside hero */
+    .hero-search-form {
+        display: flex;
+        gap: 0;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .hero-search-input {
+        flex: 1;
+        padding: 14px 18px;
+        font-size: 15px;
+        border: none;
+        outline: none;
+        background: white;
+        color: #000;
+    }
+
+    .hero-search-btn {
+        padding: 14px 24px;
         background: #f0c040;
         color: #000;
         font-weight: 700;
         font-size: 15px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+
+    .hero-search-btn:hover {
+        background: #e0b030;
+    }
+
+    /* Browse all CTA link */
+    .hero-cta {
+        display: inline-block;
+        padding: 12px 30px;
+        background: transparent;
+        color: white;
+        font-size: 14px;
         text-decoration: none;
+        border: 1px solid rgba(255,255,255,0.6);
         border-radius: 6px;
-        letter-spacing: 0.5px;
-        transition: background 0.2s, transform 0.1s;
+        transition: background 0.2s;
     }
 
     .hero-cta:hover {
-        background: #e0b030;
-        transform: translateY(-2px);
+        background: rgba(255,255,255,0.15);
     }
 
     /* ══════════════════════════════
        FEATURED PRODUCTS SECTION
     ══════════════════════════════ */
 
-    /* Section title */
     .section-title {
         margin-bottom: 20px;
     }
 
-    /* Outer wrapper — positions arrows on left and right of the track */
     .scroller-wrapper {
         position: relative;
         display: flex;
@@ -154,7 +193,6 @@
         gap: 8px;
     }
 
-    /* Scrollable track — horizontal scroll, scrollbar hidden visually */
     .scroller-track {
         display: flex;
         gap: 16px;
@@ -162,20 +200,14 @@
         scroll-behavior: smooth;
         padding: 10px 4px;
         flex: 1;
-
-        /* Hide scrollbar — Firefox */
         scrollbar-width: none;
-
-        /* Hide scrollbar — IE/Edge */
         -ms-overflow-style: none;
     }
 
-    /* Hide scrollbar — Chrome/Safari */
     .scroller-track::-webkit-scrollbar {
         display: none;
     }
 
-    /* Single product card — fixed width prevents cards from shrinking */
     .product-card {
         border: 1px solid #ddd;
         padding: 10px;
@@ -186,7 +218,6 @@
         flex-shrink: 0;
     }
 
-    /* Product image */
     .product-image {
         width: 100%;
         height: 160px;
@@ -195,20 +226,18 @@
         margin-bottom: 10px;
     }
 
-    /* Product name */
     .product-name {
         margin: 8px 0 4px;
         font-size: 14px;
     }
 
-    /* Product price */
     .product-price {
         font-weight: bold;
         margin-bottom: 10px;
         font-size: 14px;
     }
 
-    /* View Products / Add to Cart button — applies to both <a> and <button> */
+    /* Add to Cart button */
     .view-btn {
         display: inline-block;
         padding: 7px 14px;
@@ -227,7 +256,6 @@
         background: #333;
     }
 
-    /* Arrow buttons — circular black buttons on each side */
     .scroll-btn {
         background: #000;
         color: white;
@@ -252,69 +280,32 @@
        RESPONSIVE — TABLET (768px)
     ══════════════════════════════ */
     @media (max-width: 768px) {
-        .hero {
-            height: 400px;
-        }
-
-        .hero-heading {
-            font-size: 36px;
-        }
-
-        .hero-subtext {
-            font-size: 15px;
-        }
+        .hero        { height: 440px; }
+        .hero-heading { font-size: 36px; }
+        .hero-subtext { font-size: 15px; }
     }
 
     /* ══════════════════════════════
        RESPONSIVE — MOBILE (480px)
     ══════════════════════════════ */
     @media (max-width: 480px) {
-        .hero {
-            height: 320px;
-            border-radius: 8px;
-        }
+        .hero           { height: 380px; border-radius: 8px; }
+        .hero-tagline   { font-size: 11px; letter-spacing: 2px; }
+        .hero-heading   { font-size: 24px; margin-bottom: 10px; }
+        .hero-subtext   { font-size: 13px; margin-bottom: 18px; }
 
-        .hero-tagline {
-            font-size: 11px;
-            letter-spacing: 2px;
-        }
+        .hero-search-input { padding: 11px 12px; font-size: 13px; }
+        .hero-search-btn   { padding: 11px 14px; font-size: 13px; }
 
-        .hero-heading {
-            font-size: 26px;
-            margin-bottom: 12px;
-        }
+        .hero-cta { padding: 10px 20px; font-size: 13px; }
 
-        .hero-subtext {
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
+        /* Hide scroll arrows on mobile — touch swipe works natively */
+        .scroll-btn { display: none; }
 
-        .hero-cta {
-            padding: 11px 26px;
-            font-size: 13px;
-        }
-
-        /* Hide arrows on mobile — touch swipe works natively */
-        .scroll-btn {
-            display: none;
-        }
-
-        .product-card {
-            min-width: 160px;
-            max-width: 160px;
-        }
-
-        .product-image {
-            height: 130px;
-        }
-
-        .product-name {
-            font-size: 13px;
-        }
-
-        .product-price {
-            font-size: 13px;
-        }
+        .product-card  { min-width: 160px; max-width: 160px; }
+        .product-image { height: 130px; }
+        .product-name  { font-size: 13px; }
+        .product-price { font-size: 13px; }
     }
 </style>
 
@@ -322,7 +313,7 @@
     const track        = document.getElementById('scrollerTrack');
     const btnLeft      = document.getElementById('scrollLeft');
     const btnRight     = document.getElementById('scrollRight');
-    const scrollAmount = 440; // Scroll ~2 cards per arrow click
+    const scrollAmount = 440; // Scroll ~2 cards per click
 
     // Scroll left on left arrow click
     btnLeft.addEventListener('click', function () {

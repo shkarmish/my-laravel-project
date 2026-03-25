@@ -4,12 +4,29 @@
 
 <h1 class="shop-title">All Products</h1>
 
-{{-- Products grid — this div is replaced by AJAX on page change --}}
+<!-- Search bar -->
+<div class="search-wrapper">
+    <input
+        type="text"
+        id="search-input"
+        class="search-input"
+        placeholder="Search products..."
+        value="{{ $query ?? '' }}"
+        autocomplete="off"
+    >
+    <!-- Clear button — shown when search has text -->
+    <button class="search-clear" id="search-clear" style="display:none;">&#10005;</button>
+</div>
+
+<!-- "No results" message — hidden by default -->
+<p class="no-results" id="no-results" style="display:none;">No products found for your search.</p>
+
+<!-- Products grid — replaced by AJAX on search/page change -->
 <div class="shop-grid" id="products-container">
     @include('shop.partials.products', ['products' => $products])
 </div>
 
-{{-- Pagination buttons — this div is also replaced by AJAX --}}
+<!-- Pagination — replaced by AJAX -->
 <div id="pagination-container">
     @include('shop.partials.pagination', ['products' => $products])
 </div>
@@ -18,7 +35,57 @@
     /* Page title */
     .shop-title {
         text-align: center;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
+    }
+
+    /* Search bar wrapper */
+    .search-wrapper {
+        position: relative;
+        max-width: 500px;
+        margin: 0 auto 28px;
+    }
+
+    /* Search input */
+    .search-input {
+        width: 100%;
+        padding: 11px 40px 11px 16px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .search-input:focus {
+        border-color: #000;
+    }
+
+    /* Clear (x) button inside search input */
+    .search-clear {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 16px;
+        color: #888;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .search-clear:hover {
+        color: #000;
+    }
+
+    /* No results message */
+    .no-results {
+        text-align: center;
+        color: #888;
+        font-size: 15px;
+        margin: 40px 0;
     }
 
     /* Product grid — auto responsive columns */
@@ -26,7 +93,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
         gap: 20px;
-        min-height: 400px; /* Prevents layout jump while loading */
+        min-height: 200px;
     }
 
     /* Single product card */
@@ -89,7 +156,7 @@
         background: #333;
     }
 
-    /* ── Pagination ── */
+    /* Pagination wrapper */
     .pagination-wrapper {
         display: flex;
         justify-content: center;
@@ -134,35 +201,24 @@
         cursor: default;
     }
 
-    /* Loading overlay shown while AJAX is fetching */
+    /* Subtle loading fade while AJAX fetches */
     .loading-overlay {
         opacity: 0.4;
         pointer-events: none;
         transition: opacity 0.2s;
     }
 
-    /* Mobile — 2 columns */
+    /* Mobile */
     @media (max-width: 480px) {
         .shop-grid {
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
         }
 
-        .shop-image {
-            height: 130px;
-        }
-
-        .shop-name {
-            font-size: 13px;
-        }
-
-        .shop-price {
-            font-size: 13px;
-        }
-
-        .shop-description {
-            font-size: 12px;
-        }
+        .shop-image   { height: 130px; }
+        .shop-name    { font-size: 13px; }
+        .shop-price   { font-size: 13px; }
+        .shop-description { font-size: 12px; }
 
         .add-to-cart-btn {
             padding: 8px 10px;
@@ -177,41 +233,69 @@
 </style>
 
 <script>
-    // Fetch a specific page via AJAX and update the DOM without reload
-    function loadPage(page) {
-        const container  = document.getElementById('products-container');
-        const pagination = document.getElementById('pagination-container');
+    var searchTimer  = null; // Debounce timer for search input
+    var currentQuery = '{{ $query ?? '' }}'; // Track current search term
 
-        // Show subtle loading state
+    // Core AJAX fetch function — used by both search and pagination
+    function fetchProducts(page, query) {
+        var container  = document.getElementById('products-container');
+        var pagination = document.getElementById('pagination-container');
+        var noResults  = document.getElementById('no-results');
+
         container.classList.add('loading-overlay');
 
         $.ajax({
             url: '{{ route('shop.index') }}',
             method: 'GET',
-            data: { page: page },
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest' // Tells Laravel this is an AJAX request
-            },
+            data: { page: page, search: query },
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
             success: function (response) {
-                // Replace products grid and pagination with fresh HTML
                 container.innerHTML  = response.html;
                 pagination.innerHTML = response.pagination;
-
-                // Remove loading state
                 container.classList.remove('loading-overlay');
 
-                // Scroll to top of products smoothly
-                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Show "no results" message if grid is empty
+                var hasCards = container.querySelector('.shop-card');
+                noResults.style.display  = hasCards ? 'none' : 'block';
+                container.style.display  = hasCards ? 'grid' : 'none';
             }
         });
     }
 
-    // Listen for pagination button clicks — use event delegation
-    // so it works even after AJAX replaces the pagination HTML
-    $(document).on('click', '.page-btn[data-page]', function () {
-        const page = $(this).data('page');
-        loadPage(page);
+    // Search input — debounced so AJAX fires 400ms after user stops typing
+    $('#search-input').on('input', function () {
+        var query      = $(this).val().trim();
+        currentQuery   = query;
+
+        // Show/hide clear button
+        document.getElementById('search-clear').style.display = query ? 'block' : 'none';
+
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () {
+            fetchProducts(1, query); // Always reset to page 1 on new search
+        }, 400);
     });
+
+    // Clear button — wipes search and reloads all products
+    $('#search-clear').on('click', function () {
+        $('#search-input').val('');
+        currentQuery = '';
+        $(this).hide();
+        fetchProducts(1, '');
+    });
+
+    // Pagination button clicks — keep current search term
+    $(document).on('click', '.page-btn[data-page]', function () {
+        var page = $(this).data('page');
+        fetchProducts(page, currentQuery);
+        document.getElementById('products-container')
+            .scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    // Show clear button on page load if search was pre-filled
+    if ($('#search-input').val()) {
+        document.getElementById('search-clear').style.display = 'block';
+    }
 </script>
 
 @endsection
